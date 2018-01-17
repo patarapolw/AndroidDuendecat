@@ -117,9 +117,9 @@ public class DatabaseReader extends SQLiteOpenHelper {
         Sentence sentence = new Sentence();
 
         while (cursor.moveToNext()) {
-            sentence.setEnglish(cursor.getString(1));
-            sentence.setPinyin(cursor.getString(2));
-            sentence.setSentence(cursor.getString(3));
+            sentence.setEnglish(html2text(cursor.getString(1)));
+            sentence.setPinyin(html2text(cursor.getString(2)));
+            sentence.setSentence(html2text(cursor.getString(3)));
         }
 
         cursor.close();
@@ -133,5 +133,9 @@ public class DatabaseReader extends SQLiteOpenHelper {
         database.close();
 
         return cnt;
+    }
+
+    private String html2text(String html){
+        return android.text.Html.fromHtml(html).toString();
     }
 }

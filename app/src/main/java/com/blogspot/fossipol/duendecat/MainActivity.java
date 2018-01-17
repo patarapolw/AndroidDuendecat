@@ -1,17 +1,27 @@
 package com.blogspot.fossipol.duendecat;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.Locale;
 import java.util.Random;
 
+import static android.provider.AlarmClock.EXTRA_MESSAGE;
+
 public class MainActivity extends AppCompatActivity {
+    TextToSpeech langSpeak;
+    TextToSpeech enSpeak;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,14 +34,52 @@ public class MainActivity extends AppCompatActivity {
         final TextView pinyin = (TextView) findViewById(R.id.pinyin);
         final TextView enSentence = (TextView) findViewById(R.id.enSentence);
 
+        langSpeak = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int i) {
+                langSpeak.setLanguage(Locale.CHINA);
+            }
+        });
+
+        enSpeak = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int i) {
+                enSpeak.setLanguage(Locale.US);
+            }
+        });
+
         final Random rand = new Random();
         final DatabaseReader database = new DatabaseReader(this);
 
-        final int level = 3;
+        Log.i("MainActivity", "Getting extras");
+        Intent intent = getIntent();
+        Bundle extras = intent.getExtras();
+        final int level;
+        final boolean reverse;
+        final boolean speak;
+        if (extras != null) {
+            level = extras.containsKey("level") ? extras.getInt("level") : 5;
+            reverse = extras.getBoolean("reverse");
+            speak = extras.getBoolean("speak");
+        } else {
+            level = 5;
+            reverse = false;
+            speak = false;
+        }
+
+        Log.i("MainActivity", "Finish getting extras");
+
         final int limit = (int) Math.ceil(database.getNumberOfRows()*level/60f);
         final Sentence[] sentence = {database.getSentence(rand.nextInt(limit))};
 
-        langSentence.setText(sentence[0].getSentence());
+        if(!reverse) {
+            langSentence.setText(sentence[0].getSentence());
+            if(speak) langSpeak.speak(sentence[0].getSentence(), TextToSpeech.QUEUE_FLUSH, null);
+        } else {
+            langSentence.setText(sentence[0].getEnglish());
+            if(speak) enSpeak.speak(sentence[0].getEnglish(), TextToSpeech.QUEUE_FLUSH, null);
+        }
+
         pinyin.setText("");
         enSentence.setText("Click to show answer");
 
@@ -45,12 +93,26 @@ public class MainActivity extends AppCompatActivity {
                     shown_answer[0] = true;
                     button.setText("New Sentence");
                     pinyin.setText(sentence[0].getPinyin());
-                    enSentence.setText(sentence[0].getEnglish());
+                    if(!reverse) {
+                        enSentence.setText(sentence[0].getEnglish());
+                        if(speak) enSpeak.speak(sentence[0].getEnglish(), TextToSpeech.QUEUE_FLUSH, null);
+                    } else {
+                        enSentence.setText(sentence[0].getSentence());
+                        if(speak) langSpeak.speak(sentence[0].getSentence(), TextToSpeech.QUEUE_FLUSH, null);
+                    }
                 } else {
                     shown_answer[0] = false;
                     button.setText("Show Answer");
                     sentence[0] = database.getSentence(rand.nextInt(limit));
-                    langSentence.setText(sentence[0].getSentence());
+
+                    if(!reverse) {
+                        langSentence.setText(sentence[0].getSentence());
+                        if(speak) langSpeak.speak(sentence[0].getSentence(), TextToSpeech.QUEUE_FLUSH, null);
+                    } else {
+                        langSentence.setText(sentence[0].getEnglish());
+                        if(speak) enSpeak.speak(sentence[0].getEnglish(), TextToSpeech.QUEUE_FLUSH, null);
+                    }
+
                     pinyin.setText("");
                     enSentence.setText("Click to show answer");
                 }
@@ -75,9 +137,15 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            openSettings();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(this, Settings.class);
+        startActivity(intent);
     }
 }

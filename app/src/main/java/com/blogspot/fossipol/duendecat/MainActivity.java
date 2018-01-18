@@ -1,6 +1,7 @@
 package com.blogspot.fossipol.duendecat;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.AppCompatActivity;
@@ -19,9 +20,8 @@ import java.util.Random;
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 public class MainActivity extends AppCompatActivity {
-    TextToSpeech langSpeak;
-    TextToSpeech enSpeak;
-
+    private TextToSpeech langSpeak;
+    private TextToSpeech enSpeak;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,9 +62,10 @@ public class MainActivity extends AppCompatActivity {
             reverse = extras.getBoolean("reverse");
             speak = extras.getBoolean("speak");
         } else {
-            level = 5;
-            reverse = false;
-            speak = false;
+            SharedPreferences prefs = getSharedPreferences("Config",0);
+            level = prefs.getInt("level",5);
+            reverse = prefs.getBoolean("reverse", false);
+            speak = prefs.getBoolean("speak",false);
         }
 
         Log.i("MainActivity", "Finish getting extras");

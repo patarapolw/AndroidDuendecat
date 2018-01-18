@@ -51,24 +51,14 @@ public class MainActivity extends AppCompatActivity {
         final Random rand = new Random();
         final DatabaseReader database = new DatabaseReader(this);
 
-        Log.i("MainActivity", "Getting extras");
-        Intent intent = getIntent();
-        Bundle extras = intent.getExtras();
         final int level;
         final boolean reverse;
         final boolean speak;
-        if (extras != null) {
-            level = extras.containsKey("level") ? extras.getInt("level") : 5;
-            reverse = extras.getBoolean("reverse");
-            speak = extras.getBoolean("speak");
-        } else {
-            SharedPreferences prefs = getSharedPreferences("Config",0);
-            level = prefs.getInt("level",5);
-            reverse = prefs.getBoolean("reverse", false);
-            speak = prefs.getBoolean("speak",false);
-        }
 
-        Log.i("MainActivity", "Finish getting extras");
+        SharedPreferences prefs = getSharedPreferences("Config",0);
+        level = prefs.getInt("level",5);
+        reverse = prefs.getBoolean("reverse", false);
+        speak = prefs.getBoolean("speak",false);
 
         final int limit = (int) Math.ceil(database.getNumberOfRows()*level/60f);
         final Sentence[] sentence = {database.getSentence(rand.nextInt(limit))};

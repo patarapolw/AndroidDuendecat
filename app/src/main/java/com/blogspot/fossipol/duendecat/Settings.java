@@ -57,11 +57,6 @@ public class Settings extends AppCompatActivity {
         editor.putBoolean("speak", speak);
         editor.commit();
 
-        Bundle extras = new Bundle();
-        extras.putInt("level", level);
-        extras.putBoolean("reverse", reverse);
-        extras.putBoolean("speak", speak);
-        intent.putExtras(extras);
         startActivity(intent);
     }
 }

@@ -1,4 +1,28 @@
 <resources>
     <string name="app_name">Duendecat</string>
     <string name="action_settings">Settings</string>
+    <string name="level_text_chinese">Hanzi level</string>
+    <string name="level_text_japanese">Kanji level</string>
+    <string-array name="language">
+        <item>Chinese</item>
+        <item>Japanese</item>
+    </string-array>
+    <string-array name="set_chinese">
+        <item>SpoonFed</item>
+        <item>A1</item>
+        <item>A2</item>
+        <item>B1</item>
+        <item>B2</item>
+        <item>C1</item>
+    </string-array>
+    <string-array name="set_japanese">
+        <item>WaniKani</item>
+        <item>Core 10k</item>
+        <item>Kana</item>
+        <item>N5</item>
+        <item>N4</item>
+        <item>N3</item>
+        <item>N2</item>
+        <item>N1</item>
+    </string-array>
 </resources>

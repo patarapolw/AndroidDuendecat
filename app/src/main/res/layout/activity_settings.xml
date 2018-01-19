@@ -9,27 +9,137 @@
     android:layout_centerVertical="true"
     tools:context="com.blogspot.fossipol.duendecat.Settings">
 
+    <Spinner
+        android:id="@+id/lang"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="50dp"
+        app:layout_constraintLeft_toRightOf="@id/levelText"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="parent"
+        android:entries="@array/language"/>
+
+    <TextView
+        android:id="@+id/langText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Language"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/lang"
+        app:layout_constraintLeft_toLeftOf="@id/levelText" />
+
+    <EditText
+        android:id="@+id/level"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:inputType="number"
+        app:layout_constraintLeft_toLeftOf="@id/lang"
+        app:layout_constraintTop_toBottomOf="@id/lang" />
+
     <TextView
         android:id="@+id/levelText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="10dp"
         android:layout_marginLeft="50dp"
+        android:text="@string/level_text_chinese"
         android:textSize="18sp"
-        android:text="Hanzi level"
         app:layout_constraintBottom_toBottomOf="@id/level"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintLeft_toRightOf="@id/level" />
 
-    <EditText
-        android:id="@+id/level"
-        android:layout_width="100dp"
+    <Spinner
+        android:id="@+id/set"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        app:layout_constraintLeft_toLeftOf="@id/level"
+        app:layout_constraintTop_toBottomOf="@id/level"
+        android:entries="@array/set_chinese"/>
+
+    <TextView
+        android:id="@+id/setText"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
-        android:inputType="number"
-        app:layout_constraintLeft_toRightOf="@id/levelText"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="parent" />
+        android:layout_marginBottom="10dp"
+        android:text="Set"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/set"
+        app:layout_constraintLeft_toLeftOf="@id/levelText" />
+
+    <ToggleButton
+        android:id="@+id/reverse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ToggleButton"
+        app:layout_constraintLeft_toLeftOf="@id/level"
+        app:layout_constraintTop_toBottomOf="@id/set" />
+
+    <TextView
+        android:id="@+id/reverseText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Reverse"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/reverse"
+        app:layout_constraintLeft_toLeftOf="@id/levelText" />
+
+    <ToggleButton
+        android:id="@+id/speak"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ToggleButton"
+        app:layout_constraintLeft_toLeftOf="@id/level"
+        app:layout_constraintTop_toBottomOf="@id/reverse" />
+
+    <TextView
+        android:id="@+id/speakText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Speak"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/speak"
+        app:layout_constraintLeft_toLeftOf="@id/levelText" />
+
+    <ToggleButton
+        android:id="@+id/autoShow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="Manual"
+        android:textOn="Auto"
+        app:layout_constraintLeft_toLeftOf="@id/level"
+        app:layout_constraintTop_toBottomOf="@id/speak" />
+
+    <TextView
+        android:id="@+id/autoShowText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Show Answer"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/autoShow"
+        app:layout_constraintLeft_toLeftOf="@id/levelText" />
+
+    <ToggleButton
+        android:id="@+id/nextQuestion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textOff="Manual"
+        android:textOn="Auto"
+        app:layout_constraintLeft_toLeftOf="@id/level"
+        app:layout_constraintTop_toBottomOf="@id/autoShow" />
+
+    <TextView
+        android:id="@+id/nextQuestiontext"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:text="Next Question"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="@id/nextQuestion"
+        app:layout_constraintLeft_toLeftOf="@id/levelText" />
 
     <Button
         android:id="@+id/goBack"
@@ -42,40 +152,5 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent" />
 
-    <ToggleButton
-        android:id="@+id/reverse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ToggleButton"
-        app:layout_constraintLeft_toLeftOf="@id/level"
-        app:layout_constraintTop_toBottomOf="@id/level" />
-
-    <TextView
-        android:id="@+id/reverseText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Reverse"
-        android:textSize="18sp"
-        android:layout_marginBottom="10dp"
-        app:layout_constraintLeft_toLeftOf="@id/levelText"
-        app:layout_constraintBottom_toBottomOf="@id/reverse"/>
-
-    <ToggleButton
-        android:id="@+id/speak"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ToggleButton"
-        app:layout_constraintLeft_toLeftOf="@id/level"
-        app:layout_constraintTop_toBottomOf="@id/reverse"/>
-
-    <TextView
-        android:id="@+id/speakText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Speak"
-        android:textSize="18sp"
-        android:layout_marginBottom="10dp"
-        app:layout_constraintLeft_toLeftOf="@id/levelText"
-        app:layout_constraintBottom_toBottomOf="@id/speak"/>
 
 </android.support.constraint.ConstraintLayout>

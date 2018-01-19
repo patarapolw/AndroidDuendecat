@@ -34,10 +34,24 @@ public class MainActivity extends AppCompatActivity {
         final TextView pinyin = (TextView) findViewById(R.id.pinyin);
         final TextView enSentence = (TextView) findViewById(R.id.enSentence);
 
+        final String lang;
+        final int level;
+        final boolean reverse;
+        final boolean speak;
+
+        SharedPreferences prefs = getSharedPreferences("Config",0);
+        lang = prefs.getString("language", "Chinese");
+        level = prefs.getInt("level",5);
+        reverse = prefs.getBoolean("reverse", false);
+        speak = prefs.getBoolean("speak",false);
+
         langSpeak = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int i) {
-                langSpeak.setLanguage(Locale.CHINA);
+                if(lang.equals("Chinese"))
+                    langSpeak.setLanguage(Locale.CHINA);
+                else
+                    langSpeak.setLanguage(Locale.JAPAN);
             }
         });
 
@@ -51,16 +65,7 @@ public class MainActivity extends AppCompatActivity {
         final Random rand = new Random();
         final DatabaseReader database = new DatabaseReader(this);
 
-        final int level;
-        final boolean reverse;
-        final boolean speak;
-
-        SharedPreferences prefs = getSharedPreferences("Config",0);
-        level = prefs.getInt("level",5);
-        reverse = prefs.getBoolean("reverse", false);
-        speak = prefs.getBoolean("speak",false);
-
-        final int limit = (int) Math.ceil(database.getNumberOfRows()*level/60f);
+        final int limit = database.getRowLimit();
         final Sentence[] sentence = {database.getSentence(rand.nextInt(limit))};
 
         if(!reverse) {

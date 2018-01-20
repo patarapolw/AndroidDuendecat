@@ -5,119 +5,32 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.provider.Telephony;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import org.json.JSONObject;
+import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
 /**
- * Created by patarapolw on 1/15/18.
+ * Created by patarapolw on 1/21/18.
  */
 
-public class DatabaseReader extends SQLiteOpenHelper {
-    private static final String TAG = "SQLiteOpenHelper";
-    private final Context context;
+public class MyDatabase extends SQLiteAssetHelper {
     private static final int DATABASE_VERSION = 1;
-    private static final String DATABASE_NAME = "active_db";
-    private boolean createDb = false, upgradeDb = false;
     private Preferences pref;
+    private final String TAG = "MyDatabase";
+    private Context context;
 
-    public DatabaseReader(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
-        Log.i("MainActivity", "Database opening");
+    public MyDatabase(Context context, String databaseName) {
+        super(context, databaseName, null, DATABASE_VERSION);
         this.context = context;
-    }
-
-    private void copyDatabaseFromAssets(SQLiteDatabase db) {
-        Log.i(TAG, "copyDatabase");
-        InputStream myInput = null;
-        OutputStream myOutput = null;
-        try {
-            // Open db packaged as asset as the input stream
-            myInput = context.getAssets().open("databases/" + pref.getFileName());
-
-            // Open the db in the application package context:
-            myOutput = new FileOutputStream(db.getPath());
-
-            // Transfer db file contents:
-            byte[] buffer = new byte[1024];
-            int length;
-            while ((length = myInput.read(buffer)) > 0) {
-                myOutput.write(buffer, 0, length);
-            }
-            myOutput.flush();
-
-            // Set the version of the copied database to the current
-            // version:
-            SQLiteDatabase copiedDb = context.openOrCreateDatabase(
-                    DATABASE_NAME, 0, null);
-            copiedDb.execSQL("PRAGMA user_version = " + DATABASE_VERSION);
-            copiedDb.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new Error(TAG + " Error copying database");
-        } finally {
-            // Close the streams
-            try {
-                if (myOutput != null) {
-                    myOutput.close();
-                }
-                if (myInput != null) {
-                    myInput.close();
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                throw new Error(TAG + " Error closing streams");
-            }
-        }
-    }
-
-    @Override
-    public void onCreate(SQLiteDatabase db) {
-        Log.i(TAG, "onCreate db");
-        createDb = true;
-    }
-
-    @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.i(TAG, "onUpgrade db");
-        upgradeDb = true;
-    }
-
-    @Override
-    public void onOpen(SQLiteDatabase db) {
-        Log.i(TAG, "onOpen db");
-        pref = new Preferences();
-        if (createDb) {// The db in the application package
-            // context is being created.
-            // So copy the contents from the db
-            // file packaged in the assets
-            // folder:
-            createDb = false;
-            //copyDatabaseFromAssets(db);
-
-        }
-        if (upgradeDb) {// The db in the application package
-            // context is being upgraded from a lower to a higher version.
-            upgradeDb = false;
-            // Your db upgrade logic here:
-        }
-        copyDatabaseFromAssets(db);
+        this.pref = new Preferences();
     }
 
     public Sentence getSentence(int id){
-        pref = new Preferences();
         id++;
         Log.i(TAG, "Getting row: " + id);
 
@@ -143,8 +56,6 @@ public class DatabaseReader extends SQLiteOpenHelper {
     }
 
     private long getNumberOfRows(){
-        pref = new Preferences();
-        Log.i("MainActivity",pref.getFileName());
         SQLiteDatabase database = this.getReadableDatabase();
         long cnt  = DatabaseUtils.queryNumEntries(database, pref.getSheetName());
         database.close();
@@ -192,8 +103,8 @@ public class DatabaseReader extends SQLiteOpenHelper {
             else if(character == ']')
                 read = true;
             else
-                if(read)
-                    result += character;
+            if(read)
+                result += character;
         }
         return result;
     }
@@ -214,12 +125,12 @@ public class DatabaseReader extends SQLiteOpenHelper {
             getSheetName();
         }
 
-        public String getFileName(){
+        /*public String getFileName(){
             if(lang.equals("Chinese"))
                 return "chinese.db";
             else
                 return "japanese.db";
-        }
+        }*/
 
         public String getSheetName(){
             Random random = new Random();

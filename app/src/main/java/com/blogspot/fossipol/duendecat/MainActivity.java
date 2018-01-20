@@ -63,7 +63,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         final Random rand = new Random();
-        final DatabaseReader database = new DatabaseReader(this);
+        //final DatabaseReader database = new DatabaseReader(this);
+        final MyDatabase database = new MyDatabase(this, lang.toLowerCase()+".db");
 
         final int limit = database.getRowLimit();
         final Sentence[] sentence = {database.getSentence(rand.nextInt(limit))};

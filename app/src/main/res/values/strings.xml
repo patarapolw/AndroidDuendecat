@@ -16,9 +16,9 @@
         <item>C1</item>
     </string-array>
     <string-array name="set_japanese">
-        <item>WaniKani</item>
+        <item>WaniKani 10+</item>
+        <item>WaniKani 10-</item>
         <item>Core 10k</item>
-        <item>Kana</item>
         <item>N5</item>
         <item>N4</item>
         <item>N3</item>

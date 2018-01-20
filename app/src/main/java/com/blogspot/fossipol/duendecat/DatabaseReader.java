@@ -105,7 +105,7 @@ public class DatabaseReader extends SQLiteOpenHelper {
             // file packaged in the assets
             // folder:
             createDb = false;
-            copyDatabaseFromAssets(db);
+            //copyDatabaseFromAssets(db);
 
         }
         if (upgradeDb) {// The db in the application package
@@ -192,7 +192,8 @@ public class DatabaseReader extends SQLiteOpenHelper {
             else if(character == ']')
                 read = true;
             else
-                result += character;
+                if(read)
+                    result += character;
         }
         return result;
     }
@@ -222,28 +223,22 @@ public class DatabaseReader extends SQLiteOpenHelper {
 
         public String getSheetName(){
             Random random = new Random();
-            if(set.equals("WaniKani")){
-                final String[] sheets = {"WK10up", "WK10down"};
-                sheetName = sheets[random.nextInt(sheets.length)];
-            } else if (set.equals("Core 10k")){
+            if(set.equals("WaniKani 10+"))
+                sheetName = "WK10up";
+            else if(set.equals("WaniKani 10-"))
+                sheetName = "WK10down";
+            else if (set.equals("Core 10k")){
                 List<String> sheets = new ArrayList<>();
                 sheets.add("Kana");
                 for(int i=1; i<=10; i++){
                     sheets.add(String.format("Set%02d", i));
                 }
                 sheetName = sheets.get(random.nextInt(sheets.size()));
-            } else
+            }
+            else
                 sheetName = set;
 
             return sheetName;
         }
-    }
-
-    private int char2int(Character character){
-        return character - 'A' + 1;
-    }
-
-    private char int2char(Integer integer){
-        return (char)(integer - 1 + 'A');
     }
 }

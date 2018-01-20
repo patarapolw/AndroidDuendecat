@@ -33,6 +33,8 @@ public class Settings extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
+        prefs = getSharedPreferences("Config",0);
+
         langBox = (Spinner) findViewById(R.id.lang);
         levelBox = (EditText) findViewById(R.id.level);
         setBox = (Spinner) findViewById(R.id.set);
@@ -41,6 +43,8 @@ public class Settings extends AppCompatActivity {
         showAnswerBox = (ToggleButton) findViewById(R.id.autoShow);
         nextQuestionBox = (ToggleButton) findViewById(R.id.nextQuestion);
 
+        langBox.setSelection(indexOf(getResources().getStringArray(R.array.language),
+                prefs.getString("language","Chinese")));
         final String[] lang = {String.valueOf(langBox.getSelectedItem())};
         setSetLanguage(lang[0]);
 
@@ -65,17 +69,7 @@ public class Settings extends AppCompatActivity {
             }
         });
 
-        prefs = getSharedPreferences("Config",0);
-        langBox.setSelection(indexOf(getResources().getStringArray(R.array.language),
-                prefs.getString("language","Chinese")));
         levelBox.setText(Integer.toString(prefs.getInt("level",5)));
-        int langSet;
-        if(lang.equals("Chinese"))
-            langSet = R.array.set_chinese;
-        else
-            langSet = R.array.set_japanese;
-        setBox.setSelection(indexOf(getResources().getStringArray(langSet),
-                prefs.getString("set","SpoonFed")));
         reverseBox.setChecked(prefs.getBoolean("reverse",false));
         speakBox.setChecked(prefs.getBoolean("speak",false));
         showAnswerBox.setChecked(prefs.getBoolean("showAnswer",false));
@@ -113,8 +107,10 @@ public class Settings extends AppCompatActivity {
         } else {
             sets = getResources().getStringArray(R.array.set_japanese);
         }
+
         ArrayAdapter<String> setAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, sets);
         setBox.setAdapter(setAdapter);
+        setBox.setSelection(indexOf(sets, prefs.getString("set","SpoonFed")));
     }
 
     private int indexOf(String[] array, String string) {

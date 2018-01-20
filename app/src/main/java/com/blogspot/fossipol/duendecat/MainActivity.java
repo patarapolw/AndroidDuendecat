@@ -3,7 +3,9 @@ package com.blogspot.fossipol.duendecat;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -22,6 +24,7 @@ import static android.provider.AlarmClock.EXTRA_MESSAGE;
 public class MainActivity extends AppCompatActivity {
     private TextToSpeech langSpeak;
     private TextToSpeech enSpeak;
+    private boolean isSpeaking;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +87,13 @@ public class MainActivity extends AppCompatActivity {
         final boolean[] shown_answer = {false};
         button.setText("Show Answer");
 
+        final boolean showAnswer = prefs.getBoolean("showAnswer",false);
+        final boolean nextQuestion = prefs.getBoolean("nextQuestion",false);
+        final MyTimer timer = new MyTimer(showAnswer, nextQuestion, button);
+        final TextToSpeech[] ttsArray = {langSpeak, enSpeak};
+        //timer.setTimer(shown_answer[0], ttsArray);
+        timer.onTtsFinished(shown_answer[0]);
+
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (!shown_answer[0]) {
@@ -92,10 +102,15 @@ public class MainActivity extends AppCompatActivity {
                     pinyin.setText(sentence[0].getPinyin());
                     if(!reverse) {
                         enSentence.setText(sentence[0].getEnglish());
-                        if(speak) enSpeak.speak(sentence[0].getEnglish(), TextToSpeech.QUEUE_FLUSH, null);
+                        if(speak) {
+                            enSpeak.speak(sentence[0].getEnglish(), TextToSpeech.QUEUE_FLUSH, null);
+
+                        }
                     } else {
                         enSentence.setText(sentence[0].getSentence());
-                        if(speak) langSpeak.speak(sentence[0].getSentence(), TextToSpeech.QUEUE_FLUSH, null);
+                        if(speak) {
+                            langSpeak.speak(sentence[0].getSentence(), TextToSpeech.QUEUE_FLUSH, null);
+                        }
                     }
                 } else {
                     shown_answer[0] = false;
@@ -113,6 +128,8 @@ public class MainActivity extends AppCompatActivity {
                     pinyin.setText("");
                     enSentence.setText("Click to show answer");
                 }
+                //timer.setTimer(shown_answer[0], ttsArray);
+                timer.onTtsFinished(shown_answer[0]);
             }
         });
 

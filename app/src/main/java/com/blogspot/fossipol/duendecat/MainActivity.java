@@ -15,16 +15,20 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.Locale;
 import java.util.Random;
 
 import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
-public class MainActivity extends AppCompatActivity {
-    private TextToSpeech langSpeak;
-    private TextToSpeech enSpeak;
-    private boolean isSpeaking;
+public class MainActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
+    private TextToSpeech tts;
+    private boolean ttsInit = false;
+    private String lang, queueLang;
+    private String queueSentence = "";
+    private boolean shown_answer = false;
+    private MyTimer timer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
         final TextView pinyin = (TextView) findViewById(R.id.pinyin);
         final TextView enSentence = (TextView) findViewById(R.id.enSentence);
 
-        final String lang;
         final int level;
         final boolean reverse;
         final boolean speak;
@@ -48,22 +51,7 @@ public class MainActivity extends AppCompatActivity {
         reverse = prefs.getBoolean("reverse", false);
         speak = prefs.getBoolean("speak",false);
 
-        langSpeak = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int i) {
-                if(lang.equals("Chinese"))
-                    langSpeak.setLanguage(Locale.CHINA);
-                else
-                    langSpeak.setLanguage(Locale.JAPAN);
-            }
-        });
-
-        enSpeak = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int i) {
-                enSpeak.setLanguage(Locale.US);
-            }
-        });
+        tts = new TextToSpeech(getApplicationContext(), this);
 
         final Random rand = new Random();
         //final DatabaseReader database = new DatabaseReader(this);
@@ -74,62 +62,69 @@ public class MainActivity extends AppCompatActivity {
 
         if(!reverse) {
             langSentence.setText(sentence[0].getSentence());
-            if(speak) langSpeak.speak(sentence[0].getSentence(), TextToSpeech.QUEUE_FLUSH, null);
+            if(speak)
+                say(lang,sentence[0].getSentence());
         } else {
             langSentence.setText(sentence[0].getEnglish());
-            if(speak) enSpeak.speak(sentence[0].getEnglish(), TextToSpeech.QUEUE_FLUSH, null);
+            if(speak)
+                say("English",sentence[0].getEnglish());
         }
 
         pinyin.setText("");
         enSentence.setText("Click to show answer");
 
         final Button button = (Button) findViewById(R.id.button);
-        final boolean[] shown_answer = {false};
         button.setText("Show Answer");
 
         final boolean showAnswer = prefs.getBoolean("showAnswer",false);
         final boolean nextQuestion = prefs.getBoolean("nextQuestion",false);
-        final MyTimer timer = new MyTimer(showAnswer, nextQuestion, button);
-        final TextToSpeech[] ttsArray = {langSpeak, enSpeak};
-        //timer.setTimer(shown_answer[0], ttsArray);
-        timer.onTtsFinished(shown_answer[0]);
+        timer = new MyTimer(showAnswer, nextQuestion, button);
+        timer.setTimerWaitForTts(shown_answer, tts);
+        //if(!speak) timer.setTimer(shown_answer);
 
+        //final boolean[] preclick = {false};
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                if (!shown_answer[0]) {
-                    shown_answer[0] = true;
+                if (!shown_answer) {
+                    shown_answer = true;
+                    timer.showAnswerClicked = true;
+
                     button.setText("New Sentence");
                     pinyin.setText(sentence[0].getPinyin());
                     if(!reverse) {
                         enSentence.setText(sentence[0].getEnglish());
                         if(speak) {
-                            enSpeak.speak(sentence[0].getEnglish(), TextToSpeech.QUEUE_FLUSH, null);
+                            say("English",sentence[0].getEnglish());
 
                         }
                     } else {
                         enSentence.setText(sentence[0].getSentence());
                         if(speak) {
-                            langSpeak.speak(sentence[0].getSentence(), TextToSpeech.QUEUE_FLUSH, null);
+                            say(lang,sentence[0].getSentence());
                         }
                     }
                 } else {
-                    shown_answer[0] = false;
+                    shown_answer = false;
+                    timer.nextQuestionClicked = true;
+
                     button.setText("Show Answer");
                     sentence[0] = database.getSentence(rand.nextInt(limit));
 
                     if(!reverse) {
                         langSentence.setText(sentence[0].getSentence());
-                        if(speak) langSpeak.speak(sentence[0].getSentence(), TextToSpeech.QUEUE_FLUSH, null);
+                        if(speak)
+                            say(lang,sentence[0].getSentence());
                     } else {
                         langSentence.setText(sentence[0].getEnglish());
-                        if(speak) enSpeak.speak(sentence[0].getEnglish(), TextToSpeech.QUEUE_FLUSH, null);
+                        if(speak)
+                            say("English",sentence[0].getEnglish());
                     }
 
                     pinyin.setText("");
                     enSentence.setText("Click to show answer");
                 }
-                //timer.setTimer(shown_answer[0], ttsArray);
-                timer.onTtsFinished(shown_answer[0]);
+                timer.setTimerWaitForTts(shown_answer, tts);
+                //if(!speak) timer.setTimer(shown_answer);
             }
         });
 
@@ -162,4 +157,51 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this, Settings.class);
         startActivity(intent);
     }
+
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            ttsInit = true;
+            say(queueLang,queueSentence);
+            queueSentence = "";
+        } else {
+            Log.e("MainActivity", "Initialization Failed!");
+        }
+    }
+
+    public void say(String language, String sentence){
+        if(!ttsInit){
+            queueLang = language;
+            queueSentence += sentence;
+            return;
+        }
+        switch (language){
+            case "Chinese":
+                tts.setLanguage(Locale.CHINA);
+                break;
+            case "Japanese":
+                tts.setLanguage(Locale.JAPAN);
+                break;
+            default:
+                tts.setLanguage(Locale.US);
+        }
+        tts.speak(sentence, TextToSpeech.QUEUE_FLUSH, null);
+        tts.setOnUtteranceProgressListener(mProgressListener);
+    }
+
+    private UtteranceProgressListener mProgressListener = new UtteranceProgressListener() {
+        @Override
+        public void onStart(String utteranceId) {
+        } // Do nothing
+
+        @Override
+        public void onError(String utteranceId) {
+        } // Do nothing.
+
+        @Override
+        public void onDone(String utteranceId) {
+            Log.d("TTS","Trying to set Timer");
+            timer.setTimer(shown_answer);
+        }
+    };
 }

@@ -1,8 +1,10 @@
 package com.blogspot.fossipol.duendecat;
 
 import android.os.Handler;
+import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 
 /**
@@ -12,7 +14,10 @@ import android.widget.Button;
 public class MyTimer {
     private boolean showAnswer, nextQuestion;
     private Button button;
-    private final int showDelay = 5000, nextDelay = 2000; //milliseconds
+    private final int showDelay = 3000, nextDelay = 1000; //milliseconds
+    private boolean threadFinished = true;
+
+    public boolean showAnswerClicked = false, nextQuestionClicked = false;
 
     public MyTimer (boolean showAnswer, boolean nextQuestion, Button button){
         this.showAnswer = showAnswer;
@@ -20,46 +25,43 @@ public class MyTimer {
         this.button = button;
     }
 
-    public void onTtsFinished(boolean shown_answer) {
+    public void setTimer(boolean shown_answer) {
+        threadFinished = false;
         if(showAnswer && !shown_answer){
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    button.performClick();
+                    if(!showAnswerClicked) {
+                        button.performClick();
+                    } else
+                        showAnswerClicked = false;
+                    threadFinished = true;
                 }
             }, showDelay);
-
         }
 
         if(nextQuestion && shown_answer){
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    button.performClick();
+                    if(!nextQuestionClicked) {
+                        button.performClick();
+                    } else
+                        nextQuestionClicked = false;
+                    threadFinished = true;
                 }
             }, nextDelay);
         }
     }
 
-    private static boolean ttsSpeaking(TextToSpeech[] array)
-    {
-        for(int i=0; i<array.length; i++) {
-            boolean b = array[i].isSpeaking();
-            Log.d("Speak",i+" is speaking.");
-            if(b) return true;
-        }
-        return false;
-    }
-
-    public void setTimer(final boolean shown_answer, final TextToSpeech[] array){
-
+    public void setTimerWaitForTts(final boolean shown_answer, final TextToSpeech tts){
         final Handler h =new Handler();
         Runnable r = new Runnable() {
+            @Override
             public void run() {
-                if (!ttsSpeaking(array)) {
-                    onTtsFinished(shown_answer);
+                if (!tts.isSpeaking() && threadFinished) {
+                    setTimer(shown_answer);
                 }
-
                 h.postDelayed(this, 1000);
             }
         };
